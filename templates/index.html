@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cricket Clip Dataset Builder - High Speed YouTube Extractor</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #0b0f19;
+            --bg-card: #121827;
+            --bg-card-hover: #1b2438;
+            --accent-green: #10b981;
+            --accent-cyan: #06b6d4;
+            --accent-glow: rgba(16, 185, 129, 0.25);
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+            --border-color: #1f293d;
+            --danger: #ef4444;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            line-height: 1.6;
+            min-height: 100vh;
+            padding: 2rem 1rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+
+        .title-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid var(--accent-green);
+            color: var(--accent-green);
+            padding: 0.35rem 1rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #ffffff 0%, #a5f3fc 50%, #6ee7b7 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+        }
+
+        p.subtitle {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        @media (max-width: 868px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 1rem;
+            padding: 1.75rem;
+            box-shadow: 0 10px 30px -10px rgba(0,0,0,0.5);
+            transition: border-color 0.2s ease;
+        }
+
+        .card:hover {
+            border-color: rgba(16, 185, 129, 0.4);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.25rem;
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Dropzone */
+        .dropzone {
+            border: 2px dashed var(--border-color);
+            border-radius: 0.75rem;
+            padding: 2.5rem 1.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background: rgba(18, 24, 39, 0.5);
+        }
+
+        .dropzone:hover, .dropzone.dragover {
+            border-color: var(--accent-green);
+            background: rgba(16, 185, 129, 0.05);
+        }
+
+        .dropzone-icon {
+            font-size: 2.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            background: linear-gradient(135deg, var(--accent-green), var(--accent-cyan));
+            color: #000;
+            font-weight: 700;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.6rem;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            width: 100%;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px var(--accent-glow);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.1);
+            box-shadow: none;
+        }
+
+        /* Controls Form */
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-bottom: 0.4rem;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.65rem 0.9rem;
+            background: #0d121f;
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            color: var(--text-main);
+            font-family: inherit;
+            font-size: 0.95rem;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--accent-green);
+        }
+
+        /* Console Output */
+        .console {
+            background: #050811;
+            border: 1px solid var(--border-color);
+            border-radius: 0.75rem;
+            padding: 1rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            height: 240px;
+            overflow-y: auto;
+            color: #10b981;
+        }
+
+        .console-line {
+            margin-bottom: 0.25rem;
+            white-space: pre-wrap;
+        }
+
+        .console-line.error {
+            color: var(--danger);
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            width: 100%;
+            height: 8px;
+            background: var(--border-color);
+            border-radius: 999px;
+            overflow: hidden;
+            margin: 1rem 0;
+            display: none;
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--accent-green), var(--accent-cyan));
+            transition: width 0.3s ease;
+        }
+
+        /* Clip Grid */
+        .clip-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .clip-item {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-color);
+            border-radius: 0.6rem;
+            padding: 0.9rem;
+        }
+
+        .clip-item-title {
+            font-weight: 600;
+            font-size: 0.95rem;
+            word-break: break-all;
+            color: var(--accent-cyan);
+            margin-bottom: 0.4rem;
+        }
+
+        .clip-meta {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .badge-fps {
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--accent-green);
+            padding: 0.15rem 0.5rem;
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 0.75rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="title-badge">⚡ ULTRA HIGH-SPEED EXTRACTION</div>
+            <h1>Cricket Video Dataset Builder</h1>
+            <p class="subtitle">Extract exact YouTube timestamp clips at maximum FPS (up to 60fps) directly into MP4 format</p>
+        </header>
+
+        <div class="grid">
+            <!-- Step 1: Upload Excel -->
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">1. Upload Spreadsheet</span>
+                    <a href="/api/sample_excel" class="btn-secondary" style="padding: 0.3rem 0.8rem; font-size: 0.8rem; border-radius: 6px;">📥 Download Template</a>
+                </div>
+
+                <div class="dropzone" id="dropzone" onclick="document.getElementById('fileInput').click()">
+                    <div class="dropzone-icon">📊</div>
+                    <p style="font-weight: 600; margin-bottom: 0.25rem;">Click or Drag & Drop Excel (.xlsx) / CSV</p>
+                    <p style="font-size: 0.85rem; color: var(--text-muted);">Supports YouTube links & start/end timestamps</p>
+                </div>
+                <input type="file" id="fileInput" class="file-input" accept=".xlsx, .xls, .csv" onchange="handleFileSelect(event)">
+
+                <div id="fileSummary" style="margin-top: 1rem; display: none;">
+                    <p style="font-weight: 600; color: var(--accent-green);" id="fileNameText">📁 File Loaded</p>
+                    <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.25rem;" id="fileMetaText"></div>
+                </div>
+            </div>
+
+            <!-- Step 2: Settings & Execution -->
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">2. Extraction Options</span>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Target Frame Rate (FPS)</label>
+                    <select id="targetFps" class="form-input">
+                        <option value="60" selected>⚡ Max Available (Prioritize 60 FPS)</option>
+                        <option value="30">Standard (30 FPS)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Concurrent Worker Threads</label>
+                    <input type="number" id="workerThreads" class="form-input" value="4" min="1" max="16">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Output Directory</label>
+                    <input type="text" id="outputFolder" class="form-input" value="dataset_clips">
+                </div>
+
+                <button class="btn" id="startBtn" onclick="startBatchProcess()" disabled style="opacity: 0.5;">
+                    🚀 Start Extraction Batch
+                </button>
+            </div>
+        </div>
+
+        <!-- Progress & Log Section -->
+        <div class="card" style="margin-bottom: 2rem;">
+            <div class="card-header">
+                <span class="card-title">🖥️ Live Execution Console</span>
+                <span id="statusBadge" style="font-size: 0.85rem; color: var(--text-muted);">Ready</span>
+            </div>
+
+            <div class="progress-container" id="progressContainer">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+
+            <div class="console" id="consoleOutput">
+                <div class="console-line">[System] Initialized. Upload your Excel sheet to begin extracting clips...</div>
+            </div>
+        </div>
+
+        <!-- Generated Dataset Section -->
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">🎬 Extracted Dataset MP4 Clips</span>
+                <button class="btn-secondary" onclick="loadExtractedClips()" style="padding: 0.3rem 0.8rem; font-size: 0.8rem; border-radius: 6px;">🔄 Refresh List</button>
+            </div>
+            <div class="clip-list" id="clipList">
+                <p style="color: var(--text-muted); font-size: 0.9rem;">No clips extracted yet.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentFilePath = null;
+
+        const dropzone = document.getElementById('dropzone');
+        dropzone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropzone.classList.add('dragover');
+        });
+
+        dropzone.addEventListener('dragleave', () => {
+            dropzone.classList.remove('dragover');
+        });
+
+        dropzone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropzone.classList.remove('dragover');
+            if (e.dataTransfer.files.length) {
+                document.getElementById('fileInput').files = e.dataTransfer.files;
+                uploadFile(e.dataTransfer.files[0]);
+            }
+        });
+
+        function handleFileSelect(event) {
+            if (event.target.files.length) {
+                uploadFile(event.target.files[0]);
+            }
+        }
+
+        function logConsole(msg, isError = false) {
+            const consoleDiv = document.getElementById('consoleOutput');
+            const line = document.createElement('div');
+            line.className = 'console-line' + (isError ? ' error' : '');
+            line.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+            consoleDiv.appendChild(line);
+            consoleDiv.scrollTop = consoleDiv.scrollHeight;
+        }
+
+        async function uploadFile(file) {
+            const formData = new FormData();
+            formData.append('file', file);
+
+            logConsole(`Uploading & analyzing ${file.name}...`);
+
+            try {
+                const res = await fetch('/api/inspect_file', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await res.json();
+
+                if (res.ok) {
+                    currentFilePath = data.filepath;
+                    document.getElementById('fileNameText').textContent = `📁 ${file.name}`;
+                    document.getElementById('fileMetaText').textContent = `${data.total_rows} rows queued | Detected URL Col: '${data.detected_columns.url}'`;
+                    document.getElementById('fileSummary').style.display = 'block';
+
+                    const startBtn = document.getElementById('startBtn');
+                    startBtn.disabled = false;
+                    startBtn.style.opacity = '1';
+
+                    logConsole(`✅ File loaded successfully! ${data.total_rows} clips found.`);
+                } else {
+                    logConsole(`❌ Error: ${data.error}`, true);
+                }
+            } catch (err) {
+                logConsole(`❌ Upload failed: ${err.message}`, true);
+            }
+        }
+
+        async function startBatchProcess() {
+            if (!currentFilePath) return;
+
+            const startBtn = document.getElementById('startBtn');
+            startBtn.disabled = true;
+            startBtn.style.opacity = '0.5';
+
+            const progressContainer = document.getElementById('progressContainer');
+            const progressBar = document.getElementById('progressBar');
+            progressContainer.style.display = 'block';
+            progressBar.style.width = '20%';
+
+            document.getElementById('statusBadge').textContent = 'Processing...';
+            logConsole('🚀 Starting high-speed clip extraction batch...');
+
+            const bodyData = {
+                filepath: currentFilePath,
+                workers: parseInt(document.getElementById('workerThreads').value),
+                target_fps: parseInt(document.getElementById('targetFps').value),
+                output_folder: document.getElementById('outputFolder').value
+            };
+
+            try {
+                progressBar.style.width = '60%';
+                const res = await fetch('/api/start_download', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(bodyData)
+                });
+                const data = await res.json();
+
+                if (res.ok) {
+                    progressBar.style.width = '100%';
+                    document.getElementById('statusBadge').textContent = 'Completed ✅';
+                    logConsole(`🎉 Batch complete! All clips saved in: ${data.output_dir}`);
+
+                    data.results.forEach(item => {
+                        if (item.status === 'success') {
+                            logConsole(`✅ [Row ${item.row_id}] Downloaded: ${item.filename} (${item.file_size_mb} MB)`);
+                        } else {
+                            logConsole(`❌ [Row ${item.row_id}] Failed: ${item.error}`, true);
+                        }
+                    });
+
+                    loadExtractedClips();
+                } else {
+                    document.getElementById('statusBadge').textContent = 'Failed ❌';
+                    logConsole(`❌ Batch failed: ${data.error}`, true);
+                }
+            } catch (err) {
+                document.getElementById('statusBadge').textContent = 'Failed ❌';
+                logConsole(`❌ Error: ${err.message}`, true);
+            } finally {
+                startBtn.disabled = false;
+                startBtn.style.opacity = '1';
+            }
+        }
+
+        async function loadExtractedClips() {
+            try {
+                const res = await fetch('/api/list_clips');
+                const clips = await res.json();
+                const container = document.getElementById('clipList');
+
+                if (!clips.length) {
+                    container.innerHTML = '<p style="color: var(--text-muted); font-size: 0.9rem;">No clips extracted yet.</p>';
+                    return;
+                }
+
+                container.innerHTML = clips.map(clip => `
+                    <div class="clip-item">
+                        <div class="clip-item-title">🎬 ${clip.filename}</div>
+                        <div class="clip-meta">
+                            <span>Res: ${clip.resolution || 'N/A'}</span>
+                            <span class="badge-fps">${clip.fps ? clip.fps + ' FPS' : 'MP4'}</span>
+                        </div>
+                        <div class="clip-meta" style="margin-top: 0.25rem;">
+                            <span>Duration: ${clip.duration_sec ? clip.duration_sec + 's' : 'N/A'}</span>
+                            <span>Size: ${clip.size_mb ? clip.size_mb + ' MB' : 'N/A'}</span>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        // Auto load clips on page view
+        loadExtractedClips();
+    </script>
+</body>
+</html>
