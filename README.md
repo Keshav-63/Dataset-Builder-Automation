@@ -46,7 +46,7 @@ python dataset_builder.py --excel cricket_clips_input.xlsx --out dataset_clips -
 ```
 
 Useful flags:
-- `--overwrite` overwrite existing clips
+- `--overwrite` overwrite existing clip
 - `--no-subfolders` save all clips in one folder
 
 ## Run (Web UI)
